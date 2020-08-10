@@ -2,7 +2,7 @@
   "name": "ice-cream-crud",
   "version": "1.0.0",
   "description": "",
-  "main": "auctionReadData.js",
+  "main": "EmployeeTracker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
