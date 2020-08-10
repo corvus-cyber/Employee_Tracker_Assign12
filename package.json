@@ -1,5 +1,5 @@
 {
-  "name": "ice-cream-crud",
+  "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "EmployeeTracker.js",
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.3.3",
     "mysql": "^2.16.0"
   }

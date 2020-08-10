@@ -35,10 +35,10 @@ SELECT * FROM employee;
 -- LEFT JOIN returns all of the values from the left table, and the matching ones from the right table
 SELECT title, salary
 FROM roles
-INNER JOIN departments ON roles.department_id = departments.id;
+LEFT JOIN departments ON roles.department_id = departments.id;
 
 -- Shows all employees, even if we don't know the role
 SELECT first_name, last_name
 FROM employee
-INNER JOIN roles ON employee.role_id = role.id;
+LEFT JOIN roles ON employee.role_id = role.id;
 
