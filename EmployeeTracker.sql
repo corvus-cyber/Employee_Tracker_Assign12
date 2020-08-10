@@ -9,7 +9,7 @@ CREATE TABLE departments (
     PRIMARY KEY(id)
 );
 
-CREATE TABLE role (
+CREATE TABLE roles (
     id INTEGER(10) AUTO_INCREMENT NOT NULL,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL(10, 2) NOT NULL,
@@ -26,3 +26,19 @@ CREATE TABLE employee (
     PRIMARY KEY(id)
 
 );
+
+SELECT * FROM departments;
+SELECT * FROM roles;
+SELECT * FROM employee;
+
+-- Shows all roles, even if we don't know the department
+-- LEFT JOIN returns all of the values from the left table, and the matching ones from the right table
+SELECT title, salary
+FROM roles
+INNER JOIN departments ON roles.department_id = departments.id;
+
+-- Shows all employees, even if we don't know the role
+SELECT first_name, last_name
+FROM employee
+INNER JOIN roles ON employee.role_id = role.id;
+
