@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
   user: "root",
 
   // Your password
-  password: "",
+  password: "20Coding!20",
   database: "EmployeeTracker_db"
 });
 
@@ -115,32 +115,79 @@ function addMenu(){
         });
 }
 
-//Allows user to view all employees
-function AllView(){
+// //Allows user to view all employees
+// function AllView(){
 
-}
+// }
 
-//Allows user to view employees by department
-function DeptView(){
+// //Allows user to view employees by department
+// function DeptView(){
 
-}
+// }
 
-//Allows user to view employees by manager
-function ManView(){
+// //Allows user to view employees by manager
+// function ManView(){
 
-}
+// }
 
-//Allows user to add new department
-function addDepartment(){
+// //Allows user to add new department
+// function addDepartment(){
 
-}
+// }
 
-//Allows user to add new role 
-function addRole(){
+// //Allows user to add new role 
+// function addRole(){
 
-}
+// }
 
 //Allows user to add new Employee
 function addEmployee(){
+    inquirer.prompt([
+        {
+        type: "input",
+        name: "first_name",
+        message: "What is the Employee's first name?"
+        },
+    {
+        type: "input",
+        name: "last_name",
+        message: "What is the Employee's last name?"
+    },
+    {
+        type: "number",
+        name: "department_id",
+        message: "What is the Employee's role id?"
 
+    },
+    {
+        type: "number",
+        name: "manager_id",
+        message: "What is the Employee's manager id?"
+    }
+    ])
+    .then( response => {
+        buildEmployee(response);
+      });
 }
+
+//Allows user to create new employee file, basis taken from activity 10
+function buildEmployee(response){
+  console.log("Creating the profile for a new employee...\n");
+  var query = connection.query(
+    "INSERT INTO employee SET ?",
+    {
+      first_name: response.first_name,
+      last_name: response.last_name,
+      role_id: response.role_id,
+      manager_id: response.manager_id
+    },
+    function(error, res) {
+      if (error){ 
+        throw error
+    };
+      console.log(res.affectedRows + "A new Employee has been added to the system!\n");
+    }
+  );
+}
+
+
