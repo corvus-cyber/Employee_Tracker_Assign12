@@ -1,3 +1,4 @@
+var inquirer = require("inquirer");
 function menu(){
     inquirer.prompt(
         {
@@ -27,3 +28,5 @@ function menu(){
         });
         
 };
+
+module.exports = menu;
