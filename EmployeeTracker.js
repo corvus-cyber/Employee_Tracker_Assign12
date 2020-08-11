@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-const add = require("./js/add");
+const {addMenu, addEmployee, buildEmployee, addRole, buildRole, addDepartment, buildDepartment} = require("./js/add");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -40,7 +40,7 @@ function menu(){
                 viewMenu();
                 break;
             case "Add departments, roles, and employees":
-                addMenu();
+                runAdd();
                 break;
             case "Update Employee Roles":
                 updateMenu();
@@ -86,7 +86,13 @@ function viewMenu(){
         
 };
 
-
+addMenu(); 
+addEmployee();
+buildEmployee();
+addRole();
+buildRole();
+addDepartment();
+buildDepartment();
 
 // //Menu that will allow the user to choose what they want to add
 // function addMenu(){
