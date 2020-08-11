@@ -153,7 +153,7 @@ function buildDepartment(response){
           throw error
       };
         console.log(res.affectedRows + "A new Department has been added to the system!\n");
-        startMenu();
+        menu();
       }
     );
 }
@@ -196,7 +196,7 @@ function buildRole(response){
           throw error
       };
         console.log(res.affectedRows + "A new Role has been added to the system!\n");
-        startMenu();
+        menu();
       }
     );
 }
@@ -247,7 +247,7 @@ function buildEmployee(response){
         throw error
     };
       console.log(res.affectedRows + "A new Employee has been added to the system!\n");
-      startMenu();
+      menu();
     }
   );
 }
