@@ -1,5 +1,9 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+var connection = require("../connection");
+var {menu} = require("./menu")
+
+
 //Menu that will allow the user to choose what they want to add
 function addMenu(){
     inquirer.prompt(
