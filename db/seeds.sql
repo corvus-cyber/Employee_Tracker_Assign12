@@ -12,6 +12,6 @@ VALUES ("BDR", 40000, 1), ("Account Executive", 60000, 1),
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 values("Jason", "Stathum", 2, null), ("Chris", "Pratt", 1, 1), 
-("Samuel L", "Jackson" 3, null), ("Dwayne", "Johnson", 4, null), 
+("Samuel L", "Jackson", 3, null), ("Dwayne", "Johnson", 4, null), 
 ("Robert", "Downey", 4, 4)
 

@@ -144,7 +144,7 @@ function addDepartment(){
 function buildDepartment(response){
     console.log("Creating the profile for a new Role...\n");
     connection.query(
-      "INSERT INTO role SET ?",
+      "INSERT INTO departments SET ?",
       {
         name: response.name,
       },
@@ -152,7 +152,7 @@ function buildDepartment(response){
         if (error){ 
           throw error
       };
-        console.log(res.affectedRows + "A new Department has been added to the system!\n");
+        console.log("A new Department has been added to the system!\n");
         menu();
       }
     );
@@ -185,7 +185,7 @@ function addRole(){
 function buildRole(response){
     console.log("Creating the profile for a new Role...\n");
     connection.query(
-      "INSERT INTO role SET ?",
+      "INSERT INTO roles SET ?",
       {
         title: response.title,
         salary: response.salary,
@@ -195,7 +195,7 @@ function buildRole(response){
         if (error){ 
           throw error
       };
-        console.log(res.affectedRows + "A new Role has been added to the system!\n");
+        console.log("A new Role has been added to the system!\n");
         menu();
       }
     );
@@ -246,7 +246,7 @@ function buildEmployee(response){
       if (error){ 
         throw error
     };
-      console.log(res.affectedRows + "A new Employee has been added to the system!\n");
+      console.log("A new Employee has been added to the system!\n");
       menu();
     }
   );
