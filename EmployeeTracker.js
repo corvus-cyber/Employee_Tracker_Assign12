@@ -205,11 +205,12 @@ function buildRole(response){
 function addEmployee(){
   let roleChoices = [];
   let managerChoices = [];
-  connection.query("SELECT * FROM roles", (role) =>{
-    for (var i = 0; i < role.length; i++){
-      roleChoices.push(role[i].title);
+  connection.query("SELECT * FROM roles", (err, roles) =>{
+    for (var i = 0; i < roles.length; i++){
+      roleChoices.push(roles[i].title);
+      
     }
-
+    console.log(roleChoices)
     inquirer.prompt([
         {
         type: "input",
@@ -222,7 +223,7 @@ function addEmployee(){
         message: "What is the Employee's last name?"
     },
     {
-        type: "number",
+        type: "list",
         name: "role_id",
         message: "What is the Employee's role?",
         choices: roleChoices
@@ -236,24 +237,24 @@ function addEmployee(){
     // }
     ])
         .then(async(response) => {
-          connection.query("SELECT * from role where role.title = '" + response.role + "'", (error, resdeptId) => {
-            let deptId;
+          connection.query("SELECT * from roles where roles.title = '" + response.role_id + "'", (error, resroleId) => {
+            let roleId;
             if(error){
               throw error;
             }
-            resdeptId.find(depId =>{
-              deptId = depId.department_id
+            resroleId.find(posId =>{
+              roleId === posId.roles_id
             });
             console.log(roleId)
+            buildEmployee(response, roleId);
           })
-        buildEmployee(response, roleId);
       });
     })
 // })
 }
 
 //Allows user to create new employee file, basis taken from activity 10
-function buildEmployee(response){
+function buildEmployee(response, roleId){
   console.log("Creating the profile for a new employee...\n");
   connection.query(
     "INSERT INTO employee SET ?",
