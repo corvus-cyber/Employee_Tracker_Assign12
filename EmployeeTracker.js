@@ -225,7 +225,7 @@ function addEmployee(){
     connection.query("SELECT * FROM employee", (err, employees_data) =>{
       for (var i = 0; i < employees_data.length; i++){
         let worker = employees_data[i];
-        managers[worker.last_name] = worker.id
+        managers[`${worker.last_name}, ${worker.first_name}`] = worker.id
       }
         inquirer.prompt([
             {
