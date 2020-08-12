@@ -204,13 +204,15 @@ function buildRole(response){
 //Allows user to add new Employee
 function addEmployee(){
   let roleChoices = [];
+  let roleIDs = []
+  let roles = {};
   let managerChoices = [];
-  connection.query("SELECT * FROM roles", (err, roles) =>{
-    for (var i = 0; i < roles.length; i++){
-      roleChoices.push(roles[i].title);
-      
+  connection.query("SELECT * FROM roles", (err, roles_data) =>{
+    for (var i = 0; i < roles_data.length; i++){
+      let role = roles_data[i];
+      roles[role.title] = role.id
     }
-    console.log(roleChoices)
+    console.log(Object.keys(roles))
     inquirer.prompt([
         {
         type: "input",
@@ -224,10 +226,9 @@ function addEmployee(){
     },
     {
         type: "list",
-        name: "role_id",
+        name: "role",
         message: "What is the Employee's role?",
-        choices: roleChoices
-
+        choices: Object.keys(roles)
     },
     // {
     //     type: "number",
@@ -237,19 +238,10 @@ function addEmployee(){
     // }
     ])
         .then(async(response) => {
-          connection.query("SELECT * from roles where roles.title = '" + response.role_id + "'", (error, resroleId) => {
-            let roleId;
-            if(error){
-              throw error;
-            }
-            resroleId.find(posId =>{
-              roleId === posId.roles_id
-            });
-            console.log(roleId)
-            buildEmployee(response, roleId);
+            //Take the name of a role, and get the ID of the role, place it in the employee's role_i
+            buildEmployee(response, roles[response.role]);
           })
       });
-    })
 // })
 }
 
