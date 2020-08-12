@@ -163,7 +163,7 @@ function addRole(){
   connection.query("SELECT * FROM departments", (err, departments_data) =>{
     for (var i = 0; i < departments_data.length; i++){
       let dept = departments_data[i];
-      departments[dept.name] = departments.id
+      departments[dept.name] = dept.id
     }
     console.log(Object.keys(departments))
     inquirer.prompt([
@@ -188,6 +188,7 @@ function addRole(){
       .then(async(response) => {
         //Take the name of a role, and get the ID of the role, place it in the employee's role_i
         console.log(departments[response.department])
+        console.log(departments)
         buildRole(response, departments[response.department]);
       })
     });
@@ -221,38 +222,41 @@ function addEmployee(){
       let role = roles_data[i];
       roles[role.title] = role.id
     }
-    console.log(Object.keys(roles))
-    inquirer.prompt([
+    connection.query("SELECT * FROM employee", (err, employees_data) =>{
+      for (var i = 0; i < employees_data.length; i++){
+        let worker = employees_data[i];
+        managers[worker.last_name] = worker.id
+      }
+        inquirer.prompt([
+            {
+            type: "input",
+            name: "first_name",
+            message: "What is the Employee's first name?"
+            },
         {
-        type: "input",
-        name: "first_name",
-        message: "What is the Employee's first name?"
+            type: "input",
+            name: "last_name",
+            message: "What is the Employee's last name?"
         },
-    {
-        type: "input",
-        name: "last_name",
-        message: "What is the Employee's last name?"
-    },
-    {
-        type: "list",
-        name: "role",
-        message: "What is the Employee's role?",
-        choices: Object.keys(roles)
-    },
-    // {
-    //     type: "number",
-    //     name: "manager_id",
-    //     message: "Who is the Employee's manager?"
-    //     choices: managerChoices
-    // }
-    ])
+        {
+            type: "list",
+            name: "role",
+            message: "What is the Employee's role?",
+            choices: Object.keys(roles)
+        },
+        {
+            type: "list",
+            name: "manager_id",
+            message: "Who is the Employee's manager?",
+            choices: Object.keys(managers)
+        }
+        ])
         .then(async(response) => {
             //Take the name of a role, and get the ID of the role, place it in the employee's role_i
-            console.log(roles[response.role]);
-            buildEmployee(response, roles[response.role]);
+            buildEmployee(response, roles[response.role], managers[response.manager_id]);
           })
       });
-// })
+    });
 }
 
 //Allows user to create new employee file, basis taken from activity 10
