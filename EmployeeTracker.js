@@ -224,6 +224,7 @@ function addEmployee(){
     {
         type: "number",
         name: "role_id",
+        message: "What is the Employee's role?",
         choices: roleChoices
 
     },
