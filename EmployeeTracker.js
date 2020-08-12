@@ -159,6 +159,13 @@ function buildDepartment(response){
 }
 // //Allows user to add new role 
 function addRole(){
+  let departments = {};
+  connection.query("SELECT * FROM departments", (err, departments_data) =>{
+    for (var i = 0; i < departments_data.length; i++){
+      let dept = departments_data[i];
+      departments[dept.name] = departments.id
+    }
+    console.log(Object.keys(departments))
     inquirer.prompt([
         {
         type: "input",
@@ -171,25 +178,29 @@ function addRole(){
         message: "What is the Role's salary?"
     },
     {
-        type: "number",
-        name: "department_id",
-        message: "What is this Role's department id?"
+        type: "list",
+        name: "department",
+        message: "What is this Role's department id?",
+        choices: Object.keys(departments)
 
     }
     ])
-    .then( response => {
-        buildRole(response);
-      });
+      .then(async(response) => {
+        //Take the name of a role, and get the ID of the role, place it in the employee's role_i
+        console.log(departments[response.department])
+        buildRole(response, departments[response.department]);
+      })
+    });
 }
 //Takes the user's input to build a new role in sql
-function buildRole(response){
+function buildRole(response, deptID){
     console.log("Creating the profile for a new Role...\n");
     connection.query(
       "INSERT INTO roles SET ?",
       {
         title: response.title,
         salary: response.salary,
-        department_id: response.department_id,
+        department_id: deptID,
       },
       function(error, res) {
         if (error){ 
@@ -203,10 +214,8 @@ function buildRole(response){
 
 //Allows user to add new Employee
 function addEmployee(){
-  let roleChoices = [];
-  let roleIDs = []
   let roles = {};
-  let managerChoices = [];
+  let managers = {};
   connection.query("SELECT * FROM roles", (err, roles_data) =>{
     for (var i = 0; i < roles_data.length; i++){
       let role = roles_data[i];
@@ -239,6 +248,7 @@ function addEmployee(){
     ])
         .then(async(response) => {
             //Take the name of a role, and get the ID of the role, place it in the employee's role_i
+            console.log(roles[response.role]);
             buildEmployee(response, roles[response.role]);
           })
       });
@@ -246,7 +256,7 @@ function addEmployee(){
 }
 
 //Allows user to create new employee file, basis taken from activity 10
-function buildEmployee(response, roleId){
+function buildEmployee(response, roleId, managerId){
   console.log("Creating the profile for a new employee...\n");
   connection.query(
     "INSERT INTO employee SET ?",
@@ -254,7 +264,7 @@ function buildEmployee(response, roleId){
       first_name: response.first_name,
       last_name: response.last_name,
       role_id: roleId,
-      manager_id: response.manager_id
+      manager_id: managerId
     },
     function(error, res) {
       if (error){ 
