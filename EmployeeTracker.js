@@ -205,7 +205,7 @@ function buildRole(response){
 function addEmployee(){
   let roleChoices = [];
   let managerChoices = [];
-  connection.query("SELECT * FROM role", (role) =>{
+  connection.query("SELECT * FROM roles", (role) =>{
     for (var i = 0; i < role.length; i++){
       roleChoices.push(role[i].title);
     }
@@ -231,6 +231,7 @@ function addEmployee(){
     // {
     //     type: "number",
     //     name: "manager_id",
+    //     message: "Who is the Employee's manager?"
     //     choices: managerChoices
     // }
     ])
