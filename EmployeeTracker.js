@@ -203,6 +203,13 @@ function buildRole(response){
 
 //Allows user to add new Employee
 function addEmployee(){
+  let roleChoices = [];
+  let managerChoices = [];
+  connection.query("SELECT * FROM role", (role) =>{
+    for (var i = 0; i < role.length; i++){
+      roleChoices.push(role[i].title);
+    }
+
     inquirer.prompt([
         {
         type: "input",
@@ -217,18 +224,30 @@ function addEmployee(){
     {
         type: "number",
         name: "role_id",
-        message: "What is the Employee's role id?"
+        choices: roleChoices
 
     },
-    {
-        type: "number",
-        name: "manager_id",
-        message: "What is the Employee's manager id?"
-    }
+    // {
+    //     type: "number",
+    //     name: "manager_id",
+    //     choices: managerChoices
+    // }
     ])
-    .then( response => {
-        buildEmployee(response);
+        .then(async(response) => {
+          connection.query("SELECT * from role where role.title = '" + response.role + "'", (error, resdeptId) => {
+            let deptId;
+            if(error){
+              throw error;
+            }
+            resdeptId.find(depId =>{
+              deptId = depId.department_id
+            });
+            console.log(roleId)
+          })
+        buildEmployee(response, roleId);
       });
+    })
+// })
 }
 
 //Allows user to create new employee file, basis taken from activity 10
@@ -239,7 +258,7 @@ function buildEmployee(response){
     {
       first_name: response.first_name,
       last_name: response.last_name,
-      role_id: response.role_id,
+      role_id: roleId,
       manager_id: response.manager_id
     },
     function(error, res) {
