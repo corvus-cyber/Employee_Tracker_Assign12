@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-const add = require("./js/add");
+
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -39,7 +39,7 @@ function menu() {
     })
     .then((response) => {
       switch (response.startMenu) {
-        case "View Departments, roles and employees":
+        case "View Departments, Roles and Employees":
           viewMenu();
           break;
         case "Add New Department":
@@ -99,23 +99,22 @@ function viewMenu() {
 
 //Allows user to view all employees
 function AllView() {
-  connection.query(
-    `SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, departments_name AS departments_name, concat(manager.first_name, " ", manager.last_name) AS manager_full_name FROM employee 
-  LEFT JOIN roles ON employee.role_id = roles.id 
-  LEFT JOIN department ON department.id = roles.department_id 
-  LEFT JOIN employee as manager ON employee.manager_id = manager.id;`,
-    (err, res) => {
-      if (err) throw err;
-      console.log(res.length + " employee found.");
-      console.log("All employee");
-      console.table(res);
-      menu();
-    }
-  );
+  console.log("Viewing All Employees in Database...\n");
+
+  var searchAll = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
+  searchAll += "LEFT JOIN roles r ON e.role_id = r.id ";
+  searchAll += "LEFT JOIN departments d ON r.department_id = d.id ";
+  searchAll += "LEFT JOIN employee m ON m.id = e.manager_id"
+
+  connection.query(searchAll, function (err, results) {
+    console.table(results);
+  })
 }
 
 //Allows user to view employees by department
-function DeptView() {}
+function DeptView() {
+
+}
 
 //Allows user to view employees by manager
 function ManView() {}
