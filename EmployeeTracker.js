@@ -133,8 +133,8 @@ function DeptView() {
 //Allows user to view employees by manager
 function roleView() {
   //Using SELECT DISTINCT we can prevent the same roles from appearing multiple times
-  let searchRoles = "SELECT roles.id, title, salary, department_id  FROM roles ";
-  searchRoles += "LEFT JOIN departments d ON department_id = d.id";
+  let searchRoles = "SELECT roles.id, title, salary, departments.id, departments.name AS department  FROM roles";
+  searchRoles += " LEFT JOIN departments ON roles.department_id = departments.id ";
   connection.query(searchRoles, function (err, results) {
     if (err) throw err;
 
