@@ -29,8 +29,10 @@ function menu() {
       message:
         "Welcome to the Employee Tracker. What would you like to do today?",
       choices: [
-        "View Departments, roles and employees",
-        "Add departments, roles, and employees",
+        "View Departments, Roles and Employees",
+        "Add New Employee",
+        "Add New Role",
+        "Add New Department",
         "Update Employee Role",
         "Exit",
       ],
@@ -40,8 +42,14 @@ function menu() {
         case "View Departments, roles and employees":
           viewMenu();
           break;
-        case "Add departments, roles, and employees":
-          addMenu();
+        case "Add New Department":
+          addDepartment();
+          break;
+        case "Add New Role":
+          addRole();
+          break;
+        case "Add New Employee":
+          addEmployee();
           break;
         case "Update Employee Role":
           updateRole();
@@ -79,35 +87,6 @@ function viewMenu() {
           break;
         case "View employees by manager":
           ManView();
-          break;
-        case "Return to Main Menu":
-          console.log("Returning");
-          console.log("----------");
-          menu();
-          break;
-      }
-    });
-}
-
-//Menu that will allow the user to choose what they want to add
-function addMenu() {
-  inquirer
-    .prompt({
-      type: "list",
-      name: "addMenu",
-      message: "What would you like to add to the tracker?",
-      choices: ["Department", "Role", "Employee", "Return to Main Menu"],
-    })
-    .then((response) => {
-      switch (response.addMenu) {
-        case "Department":
-          addDepartment();
-          break;
-        case "Role":
-          addRole();
-          break;
-        case "Employee":
-          addEmployee();
           break;
         case "Return to Main Menu":
           console.log("Returning");
@@ -208,6 +187,7 @@ function addRole() {
       });
   });
 }
+
 //Takes the user's input to build a new role in sql
 function buildRole(response, deptID) {
   console.log("Creating the profile for a new Role...\n");
@@ -398,10 +378,8 @@ function updateRole() {
         .then(async (response) => {
           //Take the responses, including the ids of both manager and role, and send them to the build function
           pushUpdate(
-            response,
             employees[response.employee_id],
             roles[response.role]
-            
           );
         });
     });
@@ -409,8 +387,9 @@ function updateRole() {
 }
 
 //Allows user to create new employee file, basis taken from activity 10
-function pushUpdate(response, employeeId, roleId) {
-  console.log(employeeId)
+function pushUpdate(employeeId, roleId) {
+  console.log(employeeId),
+  console.log(roleId)
   console.log("Creating the profile for a new employee...\n");
   connection.query(
     "UPDATE INTO employee SET ? WHERE ?",
