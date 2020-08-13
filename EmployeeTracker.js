@@ -424,7 +424,7 @@ function updateEmployee() {
 
 //Pushes up the changes of the Employee's role
 function pushUpdate(employeeId, roleId) {
-  console.log("Creating the profile for a new employee...\n");
+  console.log("Updating this Employee's role...\n");
   connection.query(
     "UPDATE employee SET ? WHERE ?",
     [{
@@ -576,6 +576,89 @@ function removeDept(deptsID){
       menu();
     }
   );
+};
+
+function questionManager(){
+ //Empty objects to play the data from the connection.querys
+ let employees = {};
+   //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+   connection.query("SELECT * FROM employee", (err, employees_data) => {
+     for (var i = 0; i < employees_data.length; i++) {
+       let worker = employees_data[i];
+       employees[`${worker.first_name} ${worker.last_name}`] = worker.id;
+     }
+     inquirer
+       .prompt([
+         {
+           type: "list",
+           name: "employee_id",
+           message: "Which Employee do you wish to update?",
+           choices: Object.keys(employees),
+         },
+         {
+           type: "confirm",
+           name: "managerConfirm",
+           message: "does this Employee still have a manager?"
+         }
+       ])
+       .then(async (response) => {
+         if(response.managerConfirm){
+            changeManager(employees[response.employee_id]);
+         }
+         else{
+           let managerID = null;
+           updateManager(employees[response.employee_id], managerID)
+         } 
+       });
+   });
+}
+
+function changeManager(employeeID){
+   //Empty objects to play the data from the connection.querys
+   let managers = {};
+     //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+     connection.query("SELECT * FROM employee", (err, employees_data) => {
+       for (var i = 0; i < employees_data.length; i++) {
+         let worker = employees_data[i];
+         managers[`${worker.last_name}, ${worker.first_name}`] = worker.id;
+       }
+       inquirer
+         .prompt([
+           {
+             type: "list",
+             name: "manager_id",
+             message: "Who is the Employee's new manager?",
+             choices: Object.keys(managers),
+           },
+         ])
+         .then(async (response) => {
+           //Take the responses, including the ids of both manager and role, and send them to the build function
+           updateManager(employeeID, managers[response.manager_id]);
+         });
+     });
+}
+
+function updateManager(employeeID, managerID){
+  if(employeeID===managerID){
+    managerID = null
+  };
+  console.log("Updating this Employee's manager...\n");
+  connection.query(
+    "UPDATE employee SET ? WHERE ?",
+    [{
+      manager_id: managerID
+    },
+    {
+      id: employeeID
+    }],
+    function (error, res) {
+      if (error) {
+        throw error;
+      }
+      console.log("This Employee's manager has been updated!\n");
+      menu();
+    }
+  ); 
 }
 
 //This validation function will prevent the user from entering empty data
