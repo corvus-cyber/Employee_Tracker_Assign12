@@ -40,6 +40,7 @@ console.log("------------------------------");
         "Update Employee's Manager",
         "Delete Employee",
         "Delete Role",
+        "Delete Department",
         "Exit",
       ],
     })
@@ -58,7 +59,7 @@ console.log("------------------------------");
           addEmployee();
           break;
         case "Update Employee's Role":
-          updateRole();
+          updateEmployee();
           break;
         case "Update Employee's Manager":
           questionManager();
@@ -69,9 +70,13 @@ console.log("------------------------------");
         case "Delete Role":
           deleteRole();
           break;
+        case "Delete Department":
+          deleteDepartment();
+          break;
         case "Exit":
-          console.log("Enjoy the rest of your day");
-          console.log("------------------------------")
+          console.log("------------------------------");
+          console.log("- Enjoy the rest of your day -");
+          console.log("------------------------------");
           connection.end();
           return;
       }
@@ -116,7 +121,7 @@ function viewMenu() {
 function AllView() {
   console.log("------------------------------");
   console.log("Viewing All Employees in Database...\n");
-
+  //Telling what data points should be presented and how they will be titled in the table
   var searchAll = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
   //Including these left joins will allow the user to see the names of the different roles, departments, and managers rather than just their id's 
   searchAll += "LEFT JOIN roles r ON e.role_id = r.id ";
@@ -170,6 +175,7 @@ function addDepartment() {
       buildDepartment(response);
     });
 }
+//Takes the user's response and sends it to the Department table in sql 
 function buildDepartment(response) {
   console.log("Creating the profile for a new Role...\n");
   connection.query(
@@ -374,7 +380,7 @@ function buildEmployee(response, roleId, managerId) {
 }
 
 //Allows user to add new Employee if they have a manager
-function updateRole() {
+function updateEmployee() {
   //Empty objects to play the data from the connection.querys
   let roles = {};
   let employees = {};
@@ -418,8 +424,6 @@ function updateRole() {
 
 //Pushes up the changes of the Employee's role
 function pushUpdate(employeeId, roleId) {
-  console.log(employeeId),
-  console.log(roleId)
   console.log("Creating the profile for a new employee...\n");
   connection.query(
     "UPDATE employee SET ? WHERE ?",
@@ -438,32 +442,6 @@ function pushUpdate(employeeId, roleId) {
     }
   );
 };
-
-function questionManager(){
-  inquirer
-  .prompt({
-    type: "confirm",
-    name: "checking",
-    message: "Does this Employee have a manager?",
-  })
-  .then((response) => {
-    if (response.checking) {
-      changeManager();
-    } else {
-      let updateSup = null;
-      updateManager(updateSup);
-    }
-  });
-}
-
-//Lets the user choose who the new Manager is
-function changeManager(){
-
-}
-//Ports the updated manager info
-function updateManager(){
-
-}
 
 function deleteEmployee(){
   employees= {};
@@ -553,7 +531,54 @@ function removeRole(rolesID){
   );
 }
 
+//Lets the user choose which department they wish to delete
+function deleteDepartment(){
+  //Empty objects to play the data from the connection.querys
+  let departments = {};
+  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  connection.query("SELECT * FROM departments", (err, dept_data) => {
+    for (var i = 0; i < dept_data.length; i++) {
+      let department = dept_data[i];
+      departments[department.name] = department.id;
+    }
+    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "dept_id",
+            message: "Which Department do you wish to delete?",
+            choices: Object.keys(departments),
+          },
+        ])
+        .then(async (response) => {
+          //Take the responses, including the ids of both employee and role, and send them to the build function
+          removeDept(
+            departments[response.dept_id]
+          );
+        });
+    });
+}
 
+//Takes the user's input and deletes selected department
+function removeDept(deptsID){
+  console.log("Deleting Role from Database...\n");
+  connection.query(
+    "DELETE FROM departments WHERE  ?",
+    {
+      id: deptsID
+    },
+    function (error, res) {
+      if (error) {
+        throw error;
+      }
+      console.log("This Department has been deleted! Any role within that department has now been deleted\n");
+      menu();
+    }
+  );
+}
+
+//This validation function will prevent the user from entering empty data
 function catchEmpty(value) {
   if (value === "") {
     return "Please enter required information.";
