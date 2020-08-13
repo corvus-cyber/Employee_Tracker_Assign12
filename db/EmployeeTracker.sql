@@ -28,19 +28,3 @@ CREATE TABLE employee (
     FOREIGN KEY(role_id) REFERENCES roles(id),
     FOREIGN KEY(manager_id) REFERENCES employee(id) ON DELETE SET NULL
 );
-
-SELECT * FROM departments;
-SELECT * FROM roles;
-SELECT * FROM employee;
-
--- Shows all roles, even if we don't know the department
--- LEFT JOIN returns all of the values from the left table, and the matching ones from the right table
-SELECT title, salary
-FROM roles
-LEFT JOIN departments ON roles.department_id = departments.id;
-
--- Shows all employees, even if we don't know the role
-SELECT first_name, last_name
-FROM employee
-LEFT JOIN roles ON employee.role_id = role.id;
-

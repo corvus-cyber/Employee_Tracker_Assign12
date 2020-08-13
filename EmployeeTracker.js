@@ -39,6 +39,7 @@ console.log("------------------------------");
         "Update Employee's Role",
         "Update Employee's Manager",
         "Delete Employee",
+        "Delete Role",
         "Exit",
       ],
     })
@@ -64,6 +65,9 @@ console.log("------------------------------");
           break;
         case "Delete Employee":
           deleteEmployee();
+          break;
+        case "Delete Role":
+          deleteRole();
           break;
         case "Exit":
           console.log("Enjoy the rest of your day");
@@ -499,6 +503,51 @@ function pushDeleteEmp(employeeId){
         throw error;
       }
       console.log("This Employee has been deleted! If they were a manager their connection to their subordinates in the database has been severed\n");
+      menu();
+    }
+  );
+}
+
+function deleteRole(){
+  //Empty objects to play the data from the connection.querys
+  let roles = {};
+  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  connection.query("SELECT * FROM roles", (err, roles_data) => {
+    for (var i = 0; i < roles_data.length; i++) {
+      let role = roles_data[i];
+      roles[role.title] = role.id;
+    }
+    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "role",
+            message: "Which Role do you wish to delete?",
+            choices: Object.keys(roles),
+          },
+        ])
+        .then(async (response) => {
+          //Take the responses, including the ids of both employee and role, and send them to the build function
+          removeRole(
+            roles[response.role]
+          );
+        });
+    });
+}
+
+function removeRole(rolesID){
+  console.log("Deleting Role from Database...\n");
+  connection.query(
+    "DELETE FROM roles WHERE  ?",
+    {
+      id: rolesID
+    },
+    function (error, res) {
+      if (error) {
+        throw error;
+      }
+      console.log("This Role has been deleted! Any employee working within that role is now not assigned\n");
       menu();
     }
   );
