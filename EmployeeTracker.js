@@ -74,22 +74,22 @@ function viewMenu() {
       name: "viewMenu",
       message: "Which category would you like to search by?",
       choices: [
-        "View all employees",
-        "View employees by department",
-        "View employees by manager",
+        "View Departments",
+        "View Roles",
+        "View all Employees",
         "Return to Main Menu",
       ],
     })
     .then((response) => {
       switch (response.viewMenu) {
-        case "View all employees":
+        case "View all Employees":
           AllView();
           break;
-        case "View employees by department":
+        case "View Departments":
           DeptView();
           break;
-        case "View employees by manager":
-          ManView();
+        case "View Roles":
+          roleView();
           break;
         case "Return to Main Menu":
           console.log("Returning");
@@ -106,6 +106,7 @@ function AllView() {
   console.log("Viewing All Employees in Database...\n");
 
   var searchAll = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
+  //Including these left joins will allow the user to see the names of the different roles, departments, and managers rather than just their id's 
   searchAll += "LEFT JOIN roles r ON e.role_id = r.id ";
   searchAll += "LEFT JOIN departments d ON r.department_id = d.id ";
   searchAll += "LEFT JOIN employee m ON m.id = e.manager_id"
@@ -120,18 +121,29 @@ function AllView() {
 //Allows user to view employees by department
 function DeptView() {
   console.log("------------------------------");
-  let query = 'SELECT * FROM employee_trackerDB.department';
-  connection.query(query, function (err, res) {
-    if (err) throw err;
-    console.log(res.length + ' department found.');
-    console.log("All department")
-    console.table(res);
-    startTracking();
+  let searchDept = "SELECT id, name FROM departments";
+  connection.query(searchDept, function (err, results) {
+    if (err) throw err;;
+    console.log("All departments")
+    console.table(results);
+    menu();
   });
 }
 
 //Allows user to view employees by manager
-function ManView() {}
+function roleView() {
+  //Using SELECT DISTINCT we can prevent the same roles from appearing multiple times
+  let searchRoles = "SELECT id, title, salary, department.id  FROM roles";
+  searchRoles += "LEFT JOIN departments d ON r.department_id = d.id ";
+  connection.query(searchRoles, function (err, results) {
+    if (err) throw err;
+
+    console.log(results.length + ' roles found.');
+    console.log("All roles")
+    console.table(results);
+    menu();
+  });
+}
 
 //Allows user to add new department
 function addDepartment() {
