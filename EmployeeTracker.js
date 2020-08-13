@@ -1,5 +1,6 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
+const cTable = require("console.table")
 
 
 // create the connection information for the sql database
@@ -22,8 +23,10 @@ connection.connect(function (err) {
 
 //Start menu function, this will allow the user to choose which function they wish to be directed to
 function menu() {
-  inquirer
-    .prompt({
+console.log("------------------------------");
+console.log("----   EMPLOYEE TRACKER   ----");
+console.log("------------------------------");
+  inquirer.prompt({
       type: "list",
       name: "startMenu",
       message:
@@ -56,7 +59,7 @@ function menu() {
           break;
         case "Exit":
           console.log("Enjoy the rest of your day");
-          console.log("----------");
+          console.log("------------------------------")
           connection.end();
           return;
       }
@@ -90,7 +93,7 @@ function viewMenu() {
           break;
         case "Return to Main Menu":
           console.log("Returning");
-          console.log("----------");
+          console.log("------------------------------")
           menu();
           break;
       }
@@ -99,6 +102,7 @@ function viewMenu() {
 
 //Allows user to view all employees
 function AllView() {
+  console.log("------------------------------");
   console.log("Viewing All Employees in Database...\n");
 
   var searchAll = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
@@ -108,12 +112,22 @@ function AllView() {
 
   connection.query(searchAll, function (err, results) {
     console.table(results);
+    console.log("------------------------------")
+    menu();
   })
 }
 
 //Allows user to view employees by department
 function DeptView() {
-
+  console.log("------------------------------");
+  let query = 'SELECT * FROM employee_trackerDB.department';
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.log(res.length + ' department found.');
+    console.log("All department")
+    console.table(res);
+    startTracking();
+  });
 }
 
 //Allows user to view employees by manager
@@ -156,7 +170,6 @@ function addRole() {
       let dept = departments_data[i];
       departments[dept.name] = dept.id;
     }
-    console.log(Object.keys(departments));
     inquirer
       .prompt([
         {
@@ -179,9 +192,6 @@ function addRole() {
         },
       ])
       .then(async (response) => {
-        //Take the name of a role, and get the ID of the role, place it in the employee's role_i
-        console.log(departments[response.department]);
-        console.log(departments);
         buildRole(response, departments[response.department]);
       });
   });
@@ -216,11 +226,9 @@ function addEmployee() {
       message: "Does this Employee have a manager?",
     })
     .then((response) => {
-      console.log(response.checking);
       if (response.checking) {
         yesManager();
       } else {
-        console.log(response.checking);
         noManager();
       }
     });
@@ -228,7 +236,6 @@ function addEmployee() {
 
 //Allows the user to add an Employee if they have no manager
 function noManager() {
-  console.log("inside the no manager function");
   let roles = {};
   //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM roles", (err, roles_data) => {
@@ -391,7 +398,7 @@ function pushUpdate(employeeId, roleId) {
   console.log(roleId)
   console.log("Creating the profile for a new employee...\n");
   connection.query(
-    "UPDATE INTO employee SET ? WHERE ?",
+    "UPDATE employee SET ? WHERE ?",
     [{
       role_id: roleId
     },
