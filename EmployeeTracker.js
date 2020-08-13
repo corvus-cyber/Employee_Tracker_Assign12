@@ -36,7 +36,9 @@ console.log("------------------------------");
         "Add New Employee",
         "Add New Role",
         "Add New Department",
-        "Update Employee Role",
+        "Update Employee's Role",
+        "Update Employee's Manager",
+        "Delete Employee",
         "Exit",
       ],
     })
@@ -54,8 +56,14 @@ console.log("------------------------------");
         case "Add New Employee":
           addEmployee();
           break;
-        case "Update Employee Role":
+        case "Update Employee's Role":
           updateRole();
+          break;
+        case "Update Employee's Manager":
+          questionManager();
+          break;
+        case "Delete Employee":
+          deleteEmployee();
           break;
         case "Exit":
           console.log("Enjoy the rest of your day");
@@ -383,7 +391,7 @@ function updateRole() {
           {
             type: "list",
             name: "employee_id",
-            message: "Which Employee do you wish to update??",
+            message: "Which Employee do you wish to update?",
             choices: Object.keys(employees),
           },
           {
@@ -394,7 +402,7 @@ function updateRole() {
           },
         ])
         .then(async (response) => {
-          //Take the responses, including the ids of both manager and role, and send them to the build function
+          //Take the responses, including the ids of both employee and role, and send them to the build function
           pushUpdate(
             employees[response.employee_id],
             roles[response.role]
@@ -404,7 +412,7 @@ function updateRole() {
   });
 }
 
-//Allows user to create new employee file, basis taken from activity 10
+//Pushes up the changes of the Employee's role
 function pushUpdate(employeeId, roleId) {
   console.log(employeeId),
   console.log(roleId)
@@ -427,26 +435,74 @@ function pushUpdate(employeeId, roleId) {
   );
 };
 
-// function updateManager(){
-//   inquirer
-//   .prompt({
-//     type: "confirm",
-//     name: "checking",
-//     message: "Does this Employee have a manager?",
-//   })
-//   .then((response) => {
-//     if (response.checking) {
-//       inquirer.prompt({
+function questionManager(){
+  inquirer
+  .prompt({
+    type: "confirm",
+    name: "checking",
+    message: "Does this Employee have a manager?",
+  })
+  .then((response) => {
+    if (response.checking) {
+      changeManager();
+    } else {
+      let updateSup = null;
+      updateManager(updateSup);
+    }
+  });
+}
 
-//       })
-//       changeManager();
-//     } else {
-//       let updateSup = "";
-//       updateManager(updateSup);
-//     }
-//   });
-// }
+//Lets the user choose who the new Manager is
+function changeManager(){
 
+}
+//Ports the updated manager info
+function updateManager(){
+
+}
+
+function deleteEmployee(){
+  employees= {};
+  //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+  connection.query("SELECT * FROM employee", (err, employees_data) => {
+    for (var i = 0; i < employees_data.length; i++) {
+      let worker = employees_data[i];
+      employees[`${worker.first_name} ${worker.last_name}`] = worker.id;
+    }
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employee_id",
+          message: "Which Employee do you wish to delete?",
+          choices: Object.keys(employees),
+        },
+      ])
+      .then(async (response) => {
+        //Take the responses, including the ids of both employee and role, and send them to the build function
+        pushDeleteEmp(
+          employees[response.employee_id],
+        );
+      });
+  });
+}
+
+function pushDeleteEmp(employeeId){
+  console.log("Deleting Employee from Database...\n");
+  connection.query(
+    "DELETE FROM employee WHERE  ?",
+    {
+      id: employeeId
+    },
+    function (error, res) {
+      if (error) {
+        throw error;
+      }
+      console.log("This Employee has been deleted! If they were a manager their connection to their subordinates in the database has been severed\n");
+      menu();
+    }
+  );
+}
 
 
 function catchEmpty(value) {
