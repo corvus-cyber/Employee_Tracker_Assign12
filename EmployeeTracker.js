@@ -133,8 +133,8 @@ function DeptView() {
 //Allows user to view employees by manager
 function roleView() {
   //Using SELECT DISTINCT we can prevent the same roles from appearing multiple times
-  let searchRoles = "SELECT id, title, salary, department.id  FROM roles";
-  searchRoles += "LEFT JOIN departments d ON r.department_id = d.id ";
+  let searchRoles = "SELECT roles.id, title, salary, department_id  FROM roles ";
+  searchRoles += "LEFT JOIN departments d ON department_id = d.id";
   connection.query(searchRoles, function (err, results) {
     if (err) throw err;
 
@@ -425,7 +425,27 @@ function pushUpdate(employeeId, roleId) {
       menu();
     }
   );
-}
+};
+
+// function updateManager(){
+//   inquirer
+//   .prompt({
+//     type: "confirm",
+//     name: "checking",
+//     message: "Does this Employee have a manager?",
+//   })
+//   .then((response) => {
+//     if (response.checking) {
+//       inquirer.prompt({
+
+//       })
+//       changeManager();
+//     } else {
+//       let updateSup = "";
+//       updateManager(updateSup);
+//     }
+//   });
+// }
 
 
 
