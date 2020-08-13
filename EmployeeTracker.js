@@ -43,8 +43,8 @@ function menu() {
         case "Add departments, roles, and employees":
           addMenu();
           break;
-        case "Update Employee Roles":
-          updateMenu();
+        case "Update Employee Role":
+          updateRole();
           break;
         case "Exit":
           console.log("Enjoy the rest of your day");
@@ -362,6 +362,75 @@ function buildEmployee(response, roleId, managerId) {
     }
   );
 }
+
+//Allows user to add new Employee if they have a manager
+function updateRole() {
+  //Empty objects to play the data from the connection.querys
+  let roles = {};
+  let employees = {};
+  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  connection.query("SELECT * FROM roles", (err, roles_data) => {
+    for (var i = 0; i < roles_data.length; i++) {
+      let role = roles_data[i];
+      roles[role.title] = role.id;
+    }
+    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+    connection.query("SELECT * FROM employee", (err, employees_data) => {
+      for (var i = 0; i < employees_data.length; i++) {
+        let worker = employees_data[i];
+        employees[`${worker.first_name} ${worker.last_name}`] = worker.id;
+      }
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employee_id",
+            message: "Which Employee do you wish to update??",
+            choices: Object.keys(employees),
+          },
+          {
+            type: "list",
+            name: "role",
+            message: "What is the Employee's new role?",
+            choices: Object.keys(roles),
+          },
+        ])
+        .then(async (response) => {
+          //Take the responses, including the ids of both manager and role, and send them to the build function
+          pushUpdate(
+            response,
+            employees[response.employee_id],
+            roles[response.role]
+            
+          );
+        });
+    });
+  });
+}
+
+//Allows user to create new employee file, basis taken from activity 10
+function pushUpdate(response, employeeId, roleId) {
+  console.log(employeeId)
+  console.log("Creating the profile for a new employee...\n");
+  connection.query(
+    "UPDATE INTO employee SET ? WHERE ?",
+    [{
+      role_id: roleId
+    },
+    {
+      id: employeeId
+    }],
+    function (error, res) {
+      if (error) {
+        throw error;
+      }
+      console.log("This Employee's role has been updated!\n");
+      menu();
+    }
+  );
+}
+
+
 
 function catchEmpty(value) {
   if (value === "") {
