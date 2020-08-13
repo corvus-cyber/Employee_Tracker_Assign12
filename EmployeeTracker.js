@@ -115,12 +115,20 @@ function addMenu(){
 
 //Allows user to view all employees
 function AllView(){
-
+  connection.query(`SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, departments_name AS departments_name, concat(manager.first_name, " ", manager.last_name) AS manager_full_name FROM employee 
+  LEFT JOIN roles ON employee.role_id = roles.id 
+  LEFT JOIN department ON department.id = roles.department_id 
+  LEFT JOIN employee as manager ON employee.manager_id = manager.id;`, (err, res) => {
+    if (err) throw err;
+    console.log(res.length + ' employee found.');
+    console.log("All employee")
+    console.table(res);
+    menu();
+  })
 }
 
 //Allows user to view employees by department
 function DeptView(){
-
 }
 
 //Allows user to view employees by manager
@@ -134,10 +142,11 @@ function addDepartment(){
         {
         type: "input",
         name: "name",
-        message: "What is the name of this new Department?"
+        message: "What is the name of this new Department?",
+        validate: catchEmpty
         }
     )
-    .then( response => {
+    .then(async(response) => {
         buildDepartment(response);
       });
 }
@@ -170,12 +179,14 @@ function addRole(){
         {
         type: "input",
         name: "title",
-        message: "What is the title of this new Role?"
+        message: "What is the title of this new Role?",
+        validate: catchEmpty
         },
     {
         type: "input",
         name: "salary",
-        message: "What is the Role's salary?"
+        message: "What is the Role's salary?",
+        validate: catchEmpty
     },
     {
         type: "list",
@@ -213,15 +224,74 @@ function buildRole(response, deptID){
     );
 }
 
-//Allows user to add new Employee
+//Asks user if employee has manager
 function addEmployee(){
+  inquirer.prompt(
+    {
+    type: "confirm",
+    name: "checking",
+    message: "Does this Employee have a manager?"
+  })
+  .then((response) => {
+    if (response.checking){
+      yesManager();
+    }
+    else{
+      noManager();
+    }
+  })
+}
+
+
+//Allows the user to add an Employee if they have no manager
+function noManager(){
   let roles = {};
-  let managers = {};
+  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM roles", (err, roles_data) =>{
     for (var i = 0; i < roles_data.length; i++){
       let role = roles_data[i];
       roles[role.title] = role.id
     }
+    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+        inquirer.prompt([
+            {
+            type: "input",
+            name: "first_name",
+            message: "What is the Employee's first name?",
+            validate: catchEmpty
+            },
+        {
+            type: "input",
+            name: "last_name",
+            message: "What is the Employee's last name?",
+            validate: catchEmpty
+        },
+        {
+            type: "list",
+            name: "role",
+            message: "What is the Employee's role?",
+            choices: Object.keys(roles)
+        }
+        ])
+        .then(async(response) => {
+            //Take the responses, including the ids of both manager and role, and send them to the build function
+            buildEmployee(response, roles[response.role]);
+          })
+    });
+}
+
+//Allows user to add new Employee if they have a manager
+function yesManager(){
+  //Empty objects to play the data from the connection.querys
+  let roles = {};
+  let managers = {};
+  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  connection.query("SELECT * FROM roles", (err, roles_data) =>{
+    for (var i = 0; i < roles_data.length; i++){
+      let role = roles_data[i];
+      roles[role.title] = role.id
+    }
+    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
     connection.query("SELECT * FROM employee", (err, employees_data) =>{
       for (var i = 0; i < employees_data.length; i++){
         let worker = employees_data[i];
@@ -231,12 +301,14 @@ function addEmployee(){
             {
             type: "input",
             name: "first_name",
-            message: "What is the Employee's first name?"
+            message: "What is the Employee's first name?",
+            validate: catchEmpty
             },
         {
             type: "input",
             name: "last_name",
-            message: "What is the Employee's last name?"
+            message: "What is the Employee's last name?",
+            validate: catchEmpty
         },
         {
             type: "list",
@@ -252,7 +324,7 @@ function addEmployee(){
         }
         ])
         .then(async(response) => {
-            //Take the name of a role, and get the ID of the role, place it in the employee's role_i
+            //Take the responses, including the ids of both manager and role, and send them to the build function
             buildEmployee(response, roles[response.role], managers[response.manager_id]);
           })
       });
@@ -281,3 +353,17 @@ function buildEmployee(response, roleId, managerId){
 }
 
 
+
+
+function catchEmpty(value){
+
+  if(value===""){
+      return "Please enter required information."
+  } 
+  else return true;
+
+}
+
+function noManager(value){
+  
+}
