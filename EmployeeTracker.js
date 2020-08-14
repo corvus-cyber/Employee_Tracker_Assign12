@@ -119,7 +119,9 @@ function viewMenu() {
 
 //Allows user to view all employees
 function AllView() {
-  console.log("------------------------------");
+  console.log("-----------------------------");
+  console.log("----Viewing All Employees----");
+  console.log("-----------------------------");
   console.log("Viewing All Employees in Database...\n");
   //Telling what data points should be presented and how they will be titled in the table
   var searchAll = "SELECT e.id , e.first_name, e.last_name, r.title,  d.name as department, r.salary, CONCAT(m.first_name,' ',m.last_name) as manager from employee e ";
@@ -137,7 +139,9 @@ function AllView() {
 
 //Allows user to view employees by department
 function DeptView() {
-  console.log("------------------------------");
+  console.log("-----------------------------");
+  console.log("---Viewing All Departments---");
+  console.log("-----------------------------");
   let searchDept = "SELECT id, name FROM departments";
   connection.query(searchDept, function (err, data) {
     if (err) throw err;;
@@ -149,6 +153,9 @@ function DeptView() {
 
 //Allows user to view employees by manager
 function roleView() {
+  console.log("-----------------------------");
+  console.log("------Viewing All Roles------");
+  console.log("-----------------------------");
   //Using SELECT DISTINCT we can prevent the same roles from appearing multiple times
   let searchRoles = "SELECT roles.id, title, salary, departments.id, departments.name AS department  FROM roles";
   searchRoles += " LEFT JOIN departments ON roles.department_id = departments.id ";
@@ -172,26 +179,21 @@ function addDepartment() {
       validate: catchEmpty,
     })
     .then(async (response) => {
-      buildDepartment(response);
+      connection.query(
+        "INSERT INTO departments SET ?",
+        {
+          name: response.name,
+        },
+        function (error, res) {
+          if (error) {
+            throw error;
+          }
+          console.log("A new Department has been added to the system!\n");
+          menu();
+      });
     });
 }
-//Takes the user's response and sends it to the Department table in sql 
-function buildDepartment(response) {
-  console.log("Creating the profile for a new Role...\n");
-  connection.query(
-    "INSERT INTO departments SET ?",
-    {
-      name: response.name,
-    },
-    function (error, res) {
-      if (error) {
-        throw error;
-      }
-      console.log("A new Department has been added to the system!\n");
-      menu();
-    }
-  );
-}
+
 // //Allows user to add new role
 function addRole() {
   let departments = {};
@@ -222,30 +224,26 @@ function addRole() {
         },
       ])
       .then(async (response) => {
-        buildRole(response, departments[response.department]);
+        console.log("Creating the profile for a new Role...\n");
+        connection.query(
+          "INSERT INTO roles SET ?",
+          {
+            title: response.title,
+            salary: response.salary,
+            department_id: departments[response.department],
+          },
+          function (error, res) {
+            if (error) {
+              throw error;
+            }
+            console.log("A new Role has been added to the system!\n");
+            menu();
+          }
+        );
       });
   });
 }
 
-//Takes the user's input to build a new role in sql
-function buildRole(response, deptID) {
-  console.log("Creating the profile for a new Role...\n");
-  connection.query(
-    "INSERT INTO roles SET ?",
-    {
-      title: response.title,
-      salary: response.salary,
-      department_id: deptID,
-    },
-    function (error, res) {
-      if (error) {
-        throw error;
-      }
-      console.log("A new Role has been added to the system!\n");
-      menu();
-    }
-  );
-}
 
 //Asks user if employee has manager
 function addEmployee() {
@@ -257,8 +255,10 @@ function addEmployee() {
     })
     .then((response) => {
       if (response.checking) {
+        //If they want a manager, it sends them to the yesManager function
         yesManager();
       } else {
+        //If they don't want a manager, it sends them to the noManager function
         noManager();
       }
     });
@@ -273,7 +273,6 @@ function noManager() {
       let role = roles_data[i];
       roles[role.title] = role.id;
     }
-    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
     inquirer
       .prompt([
         {
@@ -296,7 +295,7 @@ function noManager() {
         },
       ])
       .then(async (response) => {
-        //Take the responses, including the ids of both manager and role, and send them to the build function
+        //Take the responses, including the id of role, and send it to the buildEmployee function
         buildEmployee(response, roles[response.role]);
       });
   });
@@ -347,7 +346,7 @@ function yesManager() {
           },
         ])
         .then(async (response) => {
-          //Take the responses, including the ids of both manager and role, and send them to the build function
+          //Take the responses, including the ids of both manager and employee, and send them to the buildEmployee function
           buildEmployee(
             response,
             roles[response.role],
@@ -379,18 +378,18 @@ function buildEmployee(response, roleId, managerId) {
   );
 }
 
-//Allows user to add new Employee if they have a manager
+//Allows user to update the Employee 
 function updateEmployee() {
   //Empty objects to play the data from the connection.querys
   let roles = {};
   let employees = {};
-  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  //This will pull from the roles table, grab the title of the roles, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM roles", (err, roles_data) => {
     for (var i = 0; i < roles_data.length; i++) {
       let role = roles_data[i];
       roles[role.title] = role.id;
     }
-    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+    //This will pull from the employees table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
     connection.query("SELECT * FROM employee", (err, employees_data) => {
       for (var i = 0; i < employees_data.length; i++) {
         let worker = employees_data[i];
@@ -412,7 +411,7 @@ function updateEmployee() {
           },
         ])
         .then(async (response) => {
-          //Take the responses, including the ids of both employee and role, and send them to the build function
+          //Take the responses, including the ids of both employee and role, and send them to the pushUpdate function
           pushUpdate(
             employees[response.employee_id],
             roles[response.role]
@@ -445,7 +444,7 @@ function pushUpdate(employeeId, roleId) {
 
 function deleteEmployee(){
   employees= {};
-  //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+  //This will pull from the employee table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM employee", (err, employees_data) => {
     for (var i = 0; i < employees_data.length; i++) {
       let worker = employees_data[i];
@@ -461,14 +460,14 @@ function deleteEmployee(){
         },
       ])
       .then(async (response) => {
-        //Take the responses, including the ids of both employee and role, and send them to the build function
+        //Take the responses, including the id of employee, and send them to the pushDeleteEmp
         pushDeleteEmp(
           employees[response.employee_id],
         );
       });
   });
 }
-
+//Takes the user's input and deletes the specifed employee from the database
 function pushDeleteEmp(employeeId){
   console.log("Deleting Employee from Database...\n");
   connection.query(
@@ -487,7 +486,7 @@ function pushDeleteEmp(employeeId){
 }
 
 function deleteRole(){
-  //Empty objects to play the data from the connection.querys
+  //Empty object to display the data from the connection.querys
   let roles = {};
   //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM roles", (err, roles_data) => {
@@ -495,7 +494,6 @@ function deleteRole(){
       let role = roles_data[i];
       roles[role.title] = role.id;
     }
-    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
       inquirer
         .prompt([
           {
@@ -506,7 +504,7 @@ function deleteRole(){
           },
         ])
         .then(async (response) => {
-          //Take the responses, including the ids of both employee and role, and send them to the build function
+          //Take the responses, including the role id, and send them to the removeRole function
           removeRole(
             roles[response.role]
           );
@@ -514,6 +512,7 @@ function deleteRole(){
     });
 }
 
+//Takes user's input and deletes the specified role from the database
 function removeRole(rolesID){
   console.log("Deleting Role from Database...\n");
   connection.query(
@@ -535,13 +534,12 @@ function removeRole(rolesID){
 function deleteDepartment(){
   //Empty objects to play the data from the connection.querys
   let departments = {};
-  //This will pull from the roles table, grab the title of the role, make it the key of an object, and attach it's affilitated id to it
+  //This will pull from the departments table, grab the title of the department, make it the key of an object, and attach it's affilitated id to it
   connection.query("SELECT * FROM departments", (err, dept_data) => {
     for (var i = 0; i < dept_data.length; i++) {
       let department = dept_data[i];
       departments[department.name] = department.id;
     }
-    //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
       inquirer
         .prompt([
           {
@@ -552,7 +550,7 @@ function deleteDepartment(){
           },
         ])
         .then(async (response) => {
-          //Take the responses, including the ids of both employee and role, and send them to the build function
+          //Take the responses, including the ids of department, and send them to the removeDept function
           removeDept(
             departments[response.dept_id]
           );
@@ -578,10 +576,11 @@ function removeDept(deptsID){
   );
 };
 
+//This function will ask which employee you are trying to edit, and whether you still want them to have a manager
 function questionManager(){
  //Empty objects to play the data from the connection.querys
  let employees = {};
-   //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+   //This will pull from the employee table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
    connection.query("SELECT * FROM employee", (err, employees_data) => {
      for (var i = 0; i < employees_data.length; i++) {
        let worker = employees_data[i];
@@ -602,10 +601,12 @@ function questionManager(){
          }
        ])
        .then(async (response) => {
+         //If they want the employee to have a manager, direct them to the changeManager function
          if(response.managerConfirm){
             changeManager(employees[response.employee_id]);
          }
          else{
+          //If they don't want the employee to have a manager, set managerID to null and direct them to the updateManager function
            let managerID = null;
            updateManager(employees[response.employee_id], managerID)
          } 
@@ -616,7 +617,7 @@ function questionManager(){
 function changeManager(employeeID){
    //Empty objects to play the data from the connection.querys
    let managers = {};
-     //This will pull from the roles table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
+     //This will pull from the employees table, grab the name of the employees, make it the key of an object, and attach it's affilitated id to it
      connection.query("SELECT * FROM employee", (err, employees_data) => {
        for (var i = 0; i < employees_data.length; i++) {
          let worker = employees_data[i];
@@ -632,13 +633,14 @@ function changeManager(employeeID){
            },
          ])
          .then(async (response) => {
-           //Take the responses, including the ids of both manager and role, and send them to the build function
+           //Take the responses, including the ids of manager and the previously decided upon employee, and send them to updateManager
            updateManager(employeeID, managers[response.manager_id]);
          });
      });
 }
 
 function updateManager(employeeID, managerID){
+  //If the user chose that the employee and the manager are the same, it will automatically set the managerID to null
   if(employeeID===managerID){
     managerID = null
   };
