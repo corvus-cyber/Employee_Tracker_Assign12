@@ -30,7 +30,7 @@ console.log("------------------------------");
       type: "list",
       name: "startMenu",
       message:
-        "Welcome to the Employee Tracker. What would you like to do today?",
+        "What would you like to do today?",
       choices: [
         "View Departments, Roles and Employees",
         "Add New Employee",
@@ -128,8 +128,8 @@ function AllView() {
   searchAll += "LEFT JOIN departments d ON r.department_id = d.id ";
   searchAll += "LEFT JOIN employee m ON m.id = e.manager_id"
 
-  connection.query(searchAll, function (err, results) {
-    console.table(results);
+  connection.query(searchAll, function (err, data) {
+    console.table(data);
     console.log("------------------------------")
     menu();
   })
@@ -139,10 +139,10 @@ function AllView() {
 function DeptView() {
   console.log("------------------------------");
   let searchDept = "SELECT id, name FROM departments";
-  connection.query(searchDept, function (err, results) {
+  connection.query(searchDept, function (err, data) {
     if (err) throw err;;
     console.log("All departments")
-    console.table(results);
+    console.table(data);
     menu();
   });
 }
@@ -152,12 +152,12 @@ function roleView() {
   //Using SELECT DISTINCT we can prevent the same roles from appearing multiple times
   let searchRoles = "SELECT roles.id, title, salary, departments.id, departments.name AS department  FROM roles";
   searchRoles += " LEFT JOIN departments ON roles.department_id = departments.id ";
-  connection.query(searchRoles, function (err, results) {
+  connection.query(searchRoles, function (err, data) {
     if (err) throw err;
 
-    console.log(results.length + ' roles found.');
+    console.log(data.length + ' roles found.');
     console.log("All roles")
-    console.table(results);
+    console.table(data);
     menu();
   });
 }
