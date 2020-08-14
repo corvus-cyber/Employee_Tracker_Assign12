@@ -51,4 +51,4 @@ There are two bonus items I would like to work on that would improve the capabil
 
 # Video
 ![Gif of the Video Demo](./demo/EmployeeTrackerDemo.gif)
-[Link to full video demo](https://drive.google.com/file/d/1wKlwPzO13AdJw4T0VzBf0dj9AAnIvPnK/view?usp=sharing)
+* [Link to full video demo](https://drive.google.com/file/d/1wKlwPzO13AdJw4T0VzBf0dj9AAnIvPnK/view?usp=sharing)
